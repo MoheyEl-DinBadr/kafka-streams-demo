@@ -1,15 +1,18 @@
 package com.mohey.favouritecolour;
 
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
+import org.apache.kafka.streams.kstream.Named;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.awt.*;
+import java.util.Arrays;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.mohey")
@@ -34,10 +37,10 @@ public class FavouriteColourApplication {
 
                     return keyValue;
                 }))
-                .filter(((key, value) -> value.contains("blue") || value.contains("red") || value.contains("green")))
+                .filter(((key, value) -> Arrays.asList("green", "blue", "red").contains(value)))
                 .toTable()
-                .groupBy(((key, value) -> KeyValue.pair(value,value)))
-                .count();
+                .groupBy(((key, value) -> KeyValue.pair(value,value)), Grouped.with(Serdes.String(), Serdes.String()))
+                .count(Named.as("count"));
 
         favoriteColorsTable.toStream().to("favourite-color-output");
 
