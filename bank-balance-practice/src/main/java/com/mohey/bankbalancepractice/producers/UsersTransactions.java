@@ -1,10 +1,13 @@
 package com.mohey.bankbalancepractice.producers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mohey.bankbalancepractice.entities.Person;
+import lombok.extern.java.Log;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -12,17 +15,21 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 
 @Component
+@Log
 public class UsersTransactions {
 
-    public final static Person johnUser = new Person("John", 0, new Date());
-    public final static Person moheyUser = new Person("Mohey El-Din", 0, new Date());
-    public final static Person mahmoudUser = new Person("Mahmoud", 0, new Date());
-    public final static Person ahmedUser = new Person("Ahmed", 0, new Date());
-    public final static Person badrUser = new Person("Badr", 0, new Date());
-    public final static Person zakiUser = new Person("Zaki", 0, new Date());
+    ObjectMapper mapper = new ObjectMapper();
+
+    public final static Person johnUser = new Person("John", 0, Instant.now());
+    public final static Person moheyUser = new Person("Mohey El-Din", 0, Instant.now());
+    public final static Person mahmoudUser = new Person("Mahmoud", 0, Instant.now());
+    public final static Person ahmedUser = new Person("Ahmed", 0, Instant.now());
+    public final static Person badrUser = new Person("Badr", 0, Instant.now());
+    public final static Person zakiUser = new Person("Zaki", 0, Instant.now());
 
 
 
@@ -57,13 +64,15 @@ public class UsersTransactions {
     }
 
 
-    public void sendMessage(String msg, String topicName) {
-        kafkaTemplate.send(topicName, msg);
+    public void sendMessage(String msg, String key, String topicName) {
+        log.info("Topic: " + topicName + ", Key: " + key + ", Msg: " + msg);
+        kafkaTemplate.send(topicName, key, msg);
     }
 
     @Bean
     public void sendTransactions(){
-        new Timer().schedule(new PersonUpdateTimer(), 0, 60);
+        mapper.registerModule(new JavaTimeModule());
+        new Timer().schedule(new PersonUpdateTimer(), 0, 4000);
     }
 
 
@@ -72,44 +81,39 @@ public class UsersTransactions {
     public class PersonUpdateTimer extends TimerTask {
 
 
-        ObjectMapper mapper = new ObjectMapper();
+
         Random random = new Random();
         @Override
         public void run() {
-            UsersTransactions.johnUser.setAmount(random.nextInt(1000));
-            UsersTransactions.johnUser.setTime(new Date());
+            UsersTransactions.johnUser.setAmount(random.nextInt(100));
+            UsersTransactions.johnUser.setTime(Instant.now());
 
-            UsersTransactions.moheyUser.setAmount(random.nextInt(1000));
-            UsersTransactions.moheyUser.setTime(new Date());
+            UsersTransactions.moheyUser.setAmount(random.nextInt(100));
+            UsersTransactions.moheyUser.setTime(Instant.now());
 
-            UsersTransactions.mahmoudUser.setAmount(random.nextInt(1000));
-            UsersTransactions.mahmoudUser.setTime(new Date());
+            UsersTransactions.mahmoudUser.setAmount(random.nextInt(100));
+            UsersTransactions.mahmoudUser.setTime(Instant.now());
 
-            UsersTransactions.ahmedUser.setAmount(random.nextInt(1000));
-            UsersTransactions.ahmedUser.setTime(new Date());
+            UsersTransactions.ahmedUser.setAmount(random.nextInt(100));
+            UsersTransactions.ahmedUser.setTime(Instant.now());
 
-            UsersTransactions.badrUser.setAmount(random.nextInt(1000));
-            UsersTransactions.badrUser.setTime(new Date());
+            UsersTransactions.badrUser.setAmount(random.nextInt(100));
+            UsersTransactions.badrUser.setTime(Instant.now());
 
-            UsersTransactions.zakiUser.setAmount(random.nextInt(1000));
-            UsersTransactions.zakiUser.setTime(new Date());
+            UsersTransactions.zakiUser.setAmount(random.nextInt(100));
+            UsersTransactions.zakiUser.setTime(Instant.now());
 
-            try {
-                sendMessage(mapper.writeValueAsString(johnUser), "transactions-input");
+            sendMessage(johnUser.toJSON().toPrettyString(), johnUser.getName(), "transactions-input");
 
-                sendMessage(mapper.writeValueAsString(moheyUser), "transactions-input");
+            sendMessage(moheyUser.toJSON().toPrettyString(), moheyUser.getName(), "transactions-input");
 
-                sendMessage(mapper.writeValueAsString(mahmoudUser), "transactions-input");
+            sendMessage(mahmoudUser.toJSON().toPrettyString(), mahmoudUser.getName(), "transactions-input");
 
-                sendMessage(mapper.writeValueAsString(ahmedUser), "transactions-input");
+            sendMessage(ahmedUser.toJSON().toPrettyString(), ahmedUser.getName(), "transactions-input");
 
-                sendMessage(mapper.writeValueAsString(badrUser), "transactions-input");
+            sendMessage(badrUser.toJSON().toPrettyString(), badrUser.getName(), "transactions-input");
 
-                sendMessage(mapper.writeValueAsString(zakiUser), "transactions-input");
-
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            sendMessage(zakiUser.toJSON().toPrettyString(), zakiUser.getName(), "transactions-input");
 
         }
     }
