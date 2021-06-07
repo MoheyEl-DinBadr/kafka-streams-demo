@@ -1,5 +1,6 @@
 package com.mohey.favouritecolour;
 
+import lombok.extern.java.Log;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.mohey")
+@Log
 public class FavouriteColourApplication {
     public static void main(String[] args) {
         SpringApplication.run(FavouriteColourApplication.class);
@@ -38,6 +40,7 @@ public class FavouriteColourApplication {
                     return keyValue;
                 }))
                 .filter(((key, value) -> Arrays.asList("green", "blue", "red").contains(value)))
+                .peek(((key, value) -> log.info("Key: " + key + "\nValue: " + key)))
                 .toTable()
                 .groupBy(((key, value) -> KeyValue.pair(value,value)), Grouped.with(Serdes.String(), Serdes.String()))
                 .count(Named.as("count"));

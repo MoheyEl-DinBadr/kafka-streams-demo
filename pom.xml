@@ -7,6 +7,7 @@
         <module>streams-config</module>
         <module>word-count-streams</module>
         <module>favourite-colour</module>
+        <module>bank-balance-practice</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

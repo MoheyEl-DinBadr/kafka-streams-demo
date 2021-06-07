@@ -32,6 +32,7 @@ public class KafkaStreamsConfig {
         props.put(StreamsConfig.STATE_DIR_CONFIG, "data");
         props.put(StreamsConfig.POLL_MS_CONFIG, 10);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10);
+        props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);
 
         //props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, JsonNode.class);
 
