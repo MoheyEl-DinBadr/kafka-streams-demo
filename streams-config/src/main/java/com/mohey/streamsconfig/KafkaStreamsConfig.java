@@ -27,20 +27,23 @@ public class KafkaStreamsConfig {
 
     @Autowired
     private StreamsBuilder streamsBuilder;
+    @Autowired
+    private Properties props;
 
     @Bean
-    public KafkaStreams kafkaStreams(KafkaProperties kafkaProperties,
-                                     @Value("${spring.application.name:streams-starter-app}") String appName){
-        log.info("appName: " + appName);
-        final Properties props = new Properties();
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+    public KafkaStreams kafkaStreams(){
+        System.out.println("props.keySet() = " + props.keySet());
+        //log.info("appName: " + appName);
+        //final Properties props = new Properties();
+        /*props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, appName);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, JsonSerde<Person>.class);
 
         props.put(StreamsConfig.STATE_DIR_CONFIG, "data");
         props.put(StreamsConfig.POLL_MS_CONFIG, 10);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10);
-        props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);
+        props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);*/
 
         //props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, JsonNode.class);
 
