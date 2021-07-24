@@ -23,15 +23,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Log
 @Component
 public class TotalUserBalanceStream {
 
     ObjectMapper objectMapper = new ObjectMapper();
-
-    @Autowired
-    private Properties props;
 
     @Bean
     public StreamsBuilder calculateBalance() {
@@ -45,7 +43,7 @@ public class TotalUserBalanceStream {
         SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.S");
 
 
-        Map<String, JsonNode> keyValue = new HashMap<>();
+        Map<String, JsonNode> keyValue = new ConcurrentHashMap<>();
 
         stream.mapValues((readOnlyKey, value) -> {
             JsonNode valueNode = null;
@@ -73,10 +71,11 @@ public class TotalUserBalanceStream {
         JsonNode lastKeyValue = keyValue.get(key);
         if (lastKeyValue == null) {
             lastKeyValue = JsonNodeFactory.instance.objectNode();
-        }
-        if (lastKeyValue.get("amount") == null) {
             ((ObjectNode) lastKeyValue).put("amount", 0.0);
         }
+        /*if (lastKeyValue.get("amount") == null) {
+            ((ObjectNode) lastKeyValue).put("amount", 0.0);
+        }*/
 
         if (lastKeyValue.get("time") != null) {
             try {
@@ -97,10 +96,10 @@ public class TotalUserBalanceStream {
         }
     }
 
-    @Bean
-    public String createProperties(KafkaProperties kafkaProperties,
+    @Bean("kafka-props")
+    public Properties createProperties(KafkaProperties kafkaProperties,
                                    @Value("${spring.application.name:streams-starter-app}") String appName) {
-
+        Properties props = new Properties();
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, appName);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
@@ -111,6 +110,6 @@ public class TotalUserBalanceStream {
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 10);
         props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE);
 
-        return "Hello";
+        return props;
     }
 }

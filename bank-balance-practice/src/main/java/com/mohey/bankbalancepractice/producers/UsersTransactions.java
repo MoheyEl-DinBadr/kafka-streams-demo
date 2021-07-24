@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Log
@@ -70,13 +72,14 @@ public class UsersTransactions {
     @Bean
     public void sendTransactions(){
         mapper.registerModule(new JavaTimeModule());
-        new Timer().schedule(new PersonUpdateTimer(), 0, 4000);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(new PersonUpdateTimer(), 0,4000, TimeUnit.MICROSECONDS);
+        //new Timer().schedule(new PersonUpdateTimer(), 0, 4000);
     }
 
 
 
 
-    public class PersonUpdateTimer extends TimerTask {
+    public class PersonUpdateTimer implements Runnable {
 
 
 
